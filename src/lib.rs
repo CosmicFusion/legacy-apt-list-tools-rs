@@ -6,7 +6,8 @@ pub struct LegacyAptSource {
     pub enabled: bool,
     pub is_source: bool,
     pub components: String,
-    pub filename: PathBuf,
+    pub filepath: PathBuf,
+    pub name: String,
     pub options: Option<String>,
     pub suite: String,
     pub url: String,
@@ -23,7 +24,8 @@ impl LegacyAptSource {
                         enabled: true,
                         is_source: entry.source,
                         components: entry.components.iter().map(|x| x.to_string() + " ").collect::<String>().trim().to_owned(),
-                        filename: file.clone().path,
+                        filepath: file.clone().path,
+                        name: entry.clone().filename(),
                         options: entry.clone().options,
                         suite: entry.clone().suite,
                         url: entry.clone().url
@@ -41,7 +43,8 @@ impl LegacyAptSource {
                                             enabled: false,
                                             is_source: entry.source,
                                             components: entry.components.iter().map(|x| x.to_string() + " ").collect::<String>().trim().to_owned(),
-                                            filename: file.clone().path,
+                                            filepath: file.clone().path,
+                                            name: entry.clone().filename(),
                                             options: entry.clone().options,
                                             suite: entry.clone().suite,
                                             url: entry.clone().url
@@ -63,7 +66,7 @@ impl LegacyAptSource {
         let mut sources_of_same_list = Vec::new();
         let mut pharsed_output = String::new();
         for source in legacy_sources_list {
-            if source.filename == target_source.filename {
+            if source.filepath == target_source.filepath {
                 sources_of_same_list.push(source)
             }
         }
@@ -83,10 +86,10 @@ impl LegacyAptSource {
                 }
             }
         }
-        if target_source.filename.exists() {
-            fs::remove_file(&target_source.filename)?
+        if target_source.filepath.exists() {
+            fs::remove_file(&target_source.filepath)?
         }
-        let mut file = File::create(target_source.filename)?;
+        let mut file = File::create(target_source.filepath)?;
         file.write_all(pharsed_output.as_bytes())?;
         Ok(())
     }
@@ -94,7 +97,7 @@ impl LegacyAptSource {
         let mut sources_of_same_list = Vec::new();
         let mut pharsed_output = String::new();
         for source in legacy_sources_list {
-            if source.filename == target_source.filename {
+            if source.filepath == target_source.filepath {
                 sources_of_same_list.push(source)
             }
         }
