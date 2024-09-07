@@ -1,5 +1,5 @@
 [package]
-name = "deb822-tools"
+name = "legacy-apt-list-tools-rs"
 version = "0.1.0"
 edition = "2021"
 
