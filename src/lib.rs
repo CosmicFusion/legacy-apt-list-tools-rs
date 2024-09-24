@@ -93,7 +93,7 @@ impl LegacyAptSource {
         file.write_all(pharsed_output.as_bytes())?;
         Ok(())
     }
-    pub fn save_to_file(target_source: Self, legacy_sources_list: Vec<Self>, filepath: &str) -> std::io::Result<()> {
+    pub fn save_to_file_via_pkexec(target_source: Self, legacy_sources_list: Vec<Self>, filepath: &str) -> std::io::Result<()> {
         let mut sources_of_same_list = Vec::new();
         let mut pharsed_output = String::new();
         for source in legacy_sources_list {
@@ -122,6 +122,34 @@ impl LegacyAptSource {
             .arg("-c")
             .arg(format!("echo -e {} > {}", pharsed_output.replace("\n", "\\\\n"), filepath))
             .output()?;
+        Ok(())
+    }
+    pub fn save_to_file(target_source: Self, legacy_sources_list: Vec<Self>, filepath: &str) -> std::io::Result<()> {
+        let mut sources_of_same_list = Vec::new();
+        let mut pharsed_output = String::new();
+        for source in legacy_sources_list {
+            if source.filepath == target_source.filepath {
+                sources_of_same_list.push(source)
+            }
+        }
+        for source in sources_of_same_list {
+            let string_prefix = match (source.enabled, source.is_source) {
+                (true, true) => "deb-src",
+                (true, false) => "deb",
+                (false, true) => "#deb-src",
+                (false, false) => "#deb"
+            };
+            match source.options {
+                Some(t) => {
+                    pharsed_output.push_str(&format!("{} [{}] {} {} {}\n", string_prefix, t, source.url, source.suite, source.components))
+                }
+                None => {
+                    pharsed_output.push_str(&format!("{} {} {} {}\n", string_prefix, source.url, source.suite, source.components))
+                }
+            }
+        }
+        let mut file = File::create(filepath)?;
+        file.write_all(pharsed_output.as_bytes())?;
         Ok(())
     }
 }
