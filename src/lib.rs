@@ -1,7 +1,7 @@
 use std::{fs::{self, File}, io::{Error, ErrorKind, Write}, path::{Path, PathBuf}, process::Command, str::FromStr};
 use apt_sources_lists::*;
 
-#[derive(Debug, Clone, Default, Eq)]
+#[derive(Debug, Clone, Default, Eq, PartialEq)]
 pub struct LegacyAptSource {
     pub enabled: bool,
     pub is_source: bool,
